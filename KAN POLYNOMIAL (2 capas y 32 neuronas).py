@@ -16,7 +16,7 @@ print(f"🚀 Dispositivo de cómputo detectado: {device.type.upper()}")
 torch.cuda.empty_cache() # Limpiar memoria previa por si acaso
 
 # =========================================================
-# 1. CLASE BASE DE LA RED NEURONAL (FOURIER KAN ESTABILIZADO)
+# 1. CLASE BASE DE LA RED NEURONAL ( KAN ESTABILIZADO)
 # =========================================================
 
 class Capa_Polynomial_KAN(nn.Module):
@@ -339,7 +339,7 @@ def update_bar(frame):
     return barras
 
 ani_barras = animation.FuncAnimation(fig_bar, update_bar, frames=total_frames_barras, interval=50, blit=False)
-nombre_gif_barras = "diagrama_barras_fourier_KAN.gif"
+nombre_gif_barras = "diagrama_barras_pol_KAN.gif"
 ani_barras.save(nombre_gif_barras, writer='pillow', fps=20)
 plt.close(fig_bar)
 
@@ -383,7 +383,7 @@ def update_gif_psi(frame):
     return linea_salto_psi, time_text_psi
 
 ani_salto = animation.FuncAnimation(fig_psi, update_gif_psi, frames=total_fotogramas_psi, interval=25, blit=True)
-ani_salto.save("salto_onda_completo_KAN.gif", writer='pillow', fps=40)
+ani_salto.save("salto_onda_completo_KANpol.gif", writer='pillow', fps=40)
 plt.close(fig_psi)
 print("✅ ¡GIFs guardados con éxito!")
 
@@ -451,6 +451,39 @@ plt.title("Prueba Termodinámica KAN: Primera Ley ($W = \Delta E$)")
 plt.xlabel("Tiempo (t)")
 plt.ylabel("Energía Transmitida (J)")
 plt.legend(loc="upper left")
+plt.grid(True, linestyle='--')
+plt.tight_layout()
+plt.show()
+
+# =========================================================
+# 10. ENERGÍA ACUMULADA DEL CONTROL (ESFUERZO INTEGRAL)
+# =========================================================
+print("Calculando la integral de la norma al cuadrado del control...")
+
+# Usamos los tensores u_laser y t_plot que ya evaluaste en la Sección 5
+u_np = u_laser.cpu().numpy().flatten()
+t_np = t_plot.cpu().numpy().flatten()
+
+# Paso de tiempo exacto para la integración
+dt_val = T_final / (len(t_np) - 1)
+
+# Calculamos la integral acumulada de |u(t)|^2 desde 0 hasta t
+# Usamos np.cumsum para ir sumando el área progresivamente
+integral_acumulada_u2 = np.cumsum(u_np**2) * dt_val
+
+# Crear y mostrar la gráfica
+plt.figure(figsize=(8, 4))
+plt.plot(t_np, integral_acumulada_u2, color='crimson', linewidth=2.5, label=r'$\int_0^t |u(\tau)|^2 d\tau$')
+
+# Línea punteada horizontal para marcar la energía total final (opcional, ayuda visual)
+energia_total_final = integral_acumulada_u2[-1]
+plt.axhline(y=energia_total_final, color='black', linestyle=':', alpha=0.6, 
+            label=f'Energía Total: {energia_total_final:.2f}')
+
+plt.title("Esfuerzo del Control Cuántico: Energía Acumulada del Láser")
+plt.xlabel("Tiempo (t)")
+plt.ylabel("Integral de $|u|^2$")
+plt.legend(loc='lower right')
 plt.grid(True, linestyle='--')
 plt.tight_layout()
 plt.show()
